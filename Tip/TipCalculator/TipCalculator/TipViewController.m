@@ -46,7 +46,9 @@
 
 - (IBAction)onTap:(id)sender {
     
+    
     //[self.view.endEditing=YES];
+    [self.view endEditing:YES];
     NSLog(@"log on tap , End editing doesnt work .. :-( ");
     [self updateValues];
 }
