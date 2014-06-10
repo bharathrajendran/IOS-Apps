@@ -9,7 +9,7 @@
 #import "MainTableViewController.h"
 #import "MovieCell.h"
 #import "SingelMovieViewViewController.h"
-//#import "MBProgressHUD.h"
+#import "MBProgressHUD.h"
 
 @interface MainTableViewController ()
 @property (weak, nonatomic) IBOutlet UITableView *tableView;
@@ -39,17 +39,33 @@
     NSString *url = @"http://api.rottentomatoes.com/api/public/v1.0/lists/dvds/top_rentals.json?apikey=g9au4hv6khv6wzvzgt55gpqs";
     NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:url]];
     
-    // anonymous method.
-    [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse *response, NSData *data, NSError *connectionError)
-    {
-        id object = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
-        //NSLog(@"%@", object);
+    // the progress bar element.
+    
+    [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+    
+    dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
         
-        self.moviesArray =  object[@"movies"];
-        [self.tableView reloadData];
         
-    }
-    ];
+        // anonymous method.
+        [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse *response, NSData *data, NSError *connectionError)
+         {
+             id object = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+             //NSLog(@"%@", object);
+             
+             self.moviesArray =  object[@"movies"];
+             [self.tableView reloadData];
+             
+         }
+         ];
+        
+        //Just to show the progress bar...
+        [NSThread sleepForTimeInterval:3.0];
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [MBProgressHUD hideHUDForView:self.view animated:YES];
+        });
+    });
+    
     
     
     [self.tableView registerNib:[UINib nibWithNibName:@"MovieCell" bundle:nil] forCellReuseIdentifier:@"MovieCell"];
